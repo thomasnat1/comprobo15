@@ -18,6 +18,7 @@ from random import gauss
 
 import math
 import time
+import random
 
 import numpy as np
 from numpy.random import random_sample
@@ -77,6 +78,8 @@ class ParticleFilter:
             current_odom_xy_theta: the pose of the robot in the odometry frame when the last filter update was performed.
                                    The pose is expressed as a list [x,y,theta] (where theta is the yaw)
             map: the map we will be localizing ourselves in.  The map should be of type nav_msgs/OccupancyGrid
+
+            particle_variance: The meter amount that the particle cloud can vary from center by 
     """
     def __init__(self):
         self.initialized = False        # make sure we don't perform updates before everything is setup
@@ -94,6 +97,8 @@ class ParticleFilter:
 
         self.laser_max_distance = 2.0   # maximum penalty to assess in the likelihood field model
 
+        self.particle_distance_variance = .2
+        self.particle_angle_variance = 45
         # TODO: define additional constants if needed
 
         # Setup pubs and subs
@@ -219,8 +224,17 @@ class ParticleFilter:
                       particle cloud around.  If this input is ommitted, the odometry will be used """
         if xy_theta == None:
             xy_theta = convert_pose_to_xy_and_theta(self.odom_pose.pose)
+        else:
+            xy_theta = (0, 0, 0)
         self.particle_cloud = []
-        # TODO create particles
+        
+
+        for i in range(0, self.n_particles):
+            x_hyp = xy_theta[0] + (random.random() - 0.5) * self.particle_distance_variance 
+            y_hyp = xy_theta[1] + (random.random() - 0.5) * self.particle_distance_variance
+            theta_hyp = xy_theta[2] + (random.random() - 0.5) * self.particle_angle_variance 
+ 
+            self.particle_cloud.append(Particle(x_hyp, y_hyp, theta_hyp))
 
         self.normalize_particles()
         self.update_robot_pose()
