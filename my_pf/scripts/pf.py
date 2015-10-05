@@ -1,11 +1,17 @@
 #!/usr/bin/env python
 
-""" This is the starter code for the robot localization project """
+"""
+Robot Localization Project
+Computational Robotics 2015
+Thomas Nattestad
+Antonia Elsen
+"""
 
 import rospy
 
 from std_msgs.msg import Header, String
 from sensor_msgs.msg import LaserScan
+from nav_msgs.msg import OccupancyGrid
 from geometry_msgs.msg import PoseStamped, PoseWithCovarianceStamped, PoseArray, Pose, Point, Quaternion
 from nav_msgs.srv import GetMap
 from copy import deepcopy
@@ -97,8 +103,8 @@ class ParticleFilter:
 
         self.laser_max_distance = 2.0   # maximum penalty to assess in the likelihood field model
 
-        self.particle_distance_variance = .2
-        self.particle_angle_variance = 45
+        self.particle_distance_variance = .1
+        self.particle_angle_variance = 3.141 / 2  # Radians
         # TODO: define additional constants if needed
 
         # Setup pubs and subs
@@ -122,6 +128,13 @@ class ParticleFilter:
         # request the map from the map server, the map should be of type nav_msgs/OccupancyGrid
         # TODO: fill in the appropriate service call here.  The resultant map should be assigned be passed
         #       into the init method for OccupancyField
+        rospy.wait_for_service('static_map')
+        try:
+          static_map_svc = rospy.ServiceProxy("static_map", GetMap)
+        except rospy.ServiceException, e:
+          print "Service call failed: %s"%e
+        static_map = static_map_svc()
+        self.occupancy_field = OccupancyField(static_map.map)
 
         # for now we have commented out the occupancy field initialization until you can successfully fetch the map
         #self.occupancy_field = OccupancyField(map)
@@ -148,6 +161,8 @@ class ParticleFilter:
 
             msg: this is not really needed to implement this, but is here just in case.
         """
+        print "Odom particle updating"
+
         new_odom_xy_theta = convert_pose_to_xy_and_theta(self.odom_pose.pose)
         # compute the change in x,y,theta since our last update
         if self.current_odom_xy_theta:
@@ -161,7 +176,22 @@ class ParticleFilter:
             self.current_odom_xy_theta = new_odom_xy_theta
             return
 
-        # TODO: modify particles using delta
+        # Determine angular rotation and displacement from odom history
+        r1 = math.atan2(delta[1], delta[0]) - old_odom_xy_theta[2]
+        d = math.sqrt((delta[0] ** 2) + (delta[1]**2))                 
+        r2 = delta[2] - r1
+        
+        # Update particle cloud
+        for particle in self.particle_cloud:
+            particle.theta = particle.theta + r1           # Initial rotation           
+            odom_x = math.cos(particle.theta) * d         # Add displacement
+            odom_y = math.sin(particle.theta) * d
+            particle.x = particle.x + odom_x
+            particle.y = particle.y + odom_y
+            particle.theta = particle.theta + r2           # Second rotation
+            
+        #noise it up some:
+        self.update_particles_with_noise()
         # For added difficulty: Implement sample_motion_odometry (Prob Rob p 136)
 
     def map_calc_range(self,x,y,theta):
@@ -217,18 +247,16 @@ class ParticleFilter:
         self.initialize_particle_cloud(xy_theta)
         self.fix_map_to_odom_transform(msg)
 
-    def initialize_particle_cloud(self, xy_theta=None):
-        """ Initialize the particle cloud.
-            Arguments
-            xy_theta: a triple consisting of the mean x, y, and theta (yaw) to initialize the
-                      particle cloud around.  If this input is ommitted, the odometry will be used """
-        if xy_theta == None:
-            xy_theta = convert_pose_to_xy_and_theta(self.odom_pose.pose)
-        else:
-            xy_theta = (0, 0, 0)
+    def update_particles_with_noise(self):
+        for aParticle in self.particle_cloud:
+            aParticle.x = aParticle.x + (random.random() - 0.5) * self.particle_distance_variance 
+            aParticle.y = aParticle.y + (random.random() - 0.5) * self.particle_distance_variance
+            aParticle.theta = aParticle.theta + (random.random() - 0.5) * self.particle_angle_variance 
+
+
+    def get_particles_with_noise(self, xy_theta):
         self.particle_cloud = []
         
-
         for i in range(0, self.n_particles):
             x_hyp = xy_theta[0] + (random.random() - 0.5) * self.particle_distance_variance 
             y_hyp = xy_theta[1] + (random.random() - 0.5) * self.particle_distance_variance
@@ -236,17 +264,35 @@ class ParticleFilter:
  
             self.particle_cloud.append(Particle(x_hyp, y_hyp, theta_hyp))
 
+
+    def initialize_particle_cloud(self, xy_theta=None):
+        """ Initialize the particle cloud.
+            Arguments
+            xy_theta: a triple consisting of the mean x, y, and theta (yaw) to initialize the
+                      particle cloud around.  If this input is ommitted, the odometry will be used """
+        if xy_theta == None:
+            xy_theta = convert_pose_to_xy_and_theta(self.odom_pose.pose)
+        
+        self.get_particles_with_noise(xy_theta)
+
         self.normalize_particles()
         self.update_robot_pose()
 
     def normalize_particles(self):
         """ Make sure the particle weights define a valid distribution (i.e. sum to 1.0) """
-        pass
-        # TODO: implement this
+        # Find largest weight
+        largest = 0.0
+        for aParticle in self.particle_cloud:
+            if aParticle.w > largest:
+                largest = aParticle.w
 
+        # Normalize
+        for aParticle in self.particle_cloud:
+            aParticle.w = aParticle.w / largest
+        
     def publish_particles(self, msg):
         particles_conv = []
-        for p in self.particle_cloud:
+        for p in self.particle_cloud:   
             particles_conv.append(p.as_pose())
         # actually send the message so that we can view it in rviz
         self.particle_pub.publish(PoseArray(header=Header(stamp=rospy.Time.now(),
