@@ -105,6 +105,10 @@ class ParticleFilter:
 
         self.particle_distance_variance = .1
         self.particle_angle_variance = 3.141 / 2  # Radians
+
+        self.sigma = .1        
+        self.reselection_amount = 0.05      
+        self.most_likely_particle = None
         # TODO: define additional constants if needed
 
         # Setup pubs and subs
@@ -209,10 +213,47 @@ class ParticleFilter:
         self.normalize_particles()
         # TODO: fill out the rest of the implementation
 
+
     def update_particles_with_laser(self, msg):
         """ Updates the particle weights in response to the scan contained in the msg """
-        # TODO: implement this
-        pass
+        # Determine weights using particle-lidar-map likelihood             # TODO: implement this
+        print "updating with laser"     
+        for aParticle in self.particle_cloud:       
+            # Iterate over lidar data (distances) by angle (degrees)        
+            likelihoods = [0] * 1         # Stores likelihood of each lidar slice       
+                
+            for angle_degrees in range(0, 1):       
+                    
+                # Add lidar distance to particle at angle       
+                distance = msg.ranges[angle_degrees]        # Raw lidar at lidar angle      
+            
+                angle_rad = angle_degrees * math.pi / 180   # Convert to rads       
+                angle_sum = aParticle.theta + angle_rad     
+                        
+                #       
+                hyp_x = aParticle.x + math.cos(angle_sum)       
+                hyp_y = aParticle.y + math.sin(angle_sum)       
+            
+                d = self.occupancy_field.get_closest_obstacle_distance(hyp_x, hyp_y)        
+                        
+                likelihoods[angle_degrees] = math.exp( (-d**2) / (self.sigma**2) )      
+                        
+            # Combine all likelihoods to calculate particle weight      
+                # average the cube of each likelihood       
+            aParticle.w = math.fsum([l ** 3 for l in likelihoods]) / len(likelihoods)       
+                
+        self.particle_weights = []      
+        for aParticle in self.particle_cloud:       
+            self.particle_weights.append(aParticle.w)       
+        
+        self.normalize_particles()      
+                
+        normalized_counter = 0      
+        for index, aParticle in enumerate(self.particle_cloud):     
+            if aParticle.w == 1.0:      
+              normalized_counter += 1       
+                    
+        print "P of weight 1.0:", normalized_counter
 
     @staticmethod
     def weighted_values(values, probabilities, size):
@@ -285,6 +326,7 @@ class ParticleFilter:
         for aParticle in self.particle_cloud:
             if aParticle.w > largest:
                 largest = aParticle.w
+                self.most_likely_particle = aParticle
 
         # Normalize
         for aParticle in self.particle_cloud:
