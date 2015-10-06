@@ -157,6 +157,28 @@ class ParticleFilter:
         # just to get started we will fix the robot's pose to always be at the origin
         self.robot_pose = Pose()
 
+    def sum_particles(self, particle_list):     
+        # Determines the average coordinate from a list of particles.       
+        x_sum = 0.0     
+        y_sum = 0.0     
+        theta_sum = 0.0     
+        num = len(particle_list)        
+                
+        # Sum all x, y, theta data (averaged later)     
+        for aParticle in particle_list:     
+          x_sum += aParticle.x      
+          y_sum += aParticle.y      
+          theta_sum += aParticle.theta      
+                
+        # Create particle with pose information to extract Pose class       
+        new_pose_particle = Particle(x = x_sum / num,       
+                                     y = y_sum / num,       
+                                     theta = theta_sum / num,       
+                                     w = 0)     
+        new_pose = new_pose_particle.as_pose()      
+                
+        return new_pose
+
     def update_particles_with_odom(self, msg):
         """ Update the particles using the newly given odometry pose.
             The function computes the value delta which is a tuple (x,y,theta)
@@ -211,7 +233,23 @@ class ParticleFilter:
         """
         # make sure the distribution is normalized
         self.normalize_particles()
-        # TODO: fill out the rest of the implementation
+        
+
+        survivors = self.draw_random_sample(self.particle_cloud, self.particle_weights,         
+                                    self.reselection_amount * self.n_particles)     
+        print "num survivors / all: ", len(survivors), " / ", len(self.particle_cloud)      
+                
+                
+        # create new children of the survivors with variance, eliminate non-survivors       
+        # self.particle_cloud = []      
+        # for aSurvivor in survivors:       
+        #     self.particle_cloud.append(aSurvivor)     
+        #     for i in range(1, int(1/self.reselection_amount)):        
+        #         x_hyp = aSurvivor.x + (random.random() - 0.5) * self.particle_distance_variance       
+        #         y_hyp = aSurvivor.y + (random.random() - 0.5) * self.particle_distance_variance       
+        #         theta_hyp = aSurvivor.theta + (random.random() - 0.5) * self.particle_angle_variance      
+        
+        #     self.particle_cloud.append(Particle(x_hyp, y_hyp, theta_hyp))
 
 
     def update_particles_with_laser(self, msg):
