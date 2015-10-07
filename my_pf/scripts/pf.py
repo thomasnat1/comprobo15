@@ -103,8 +103,8 @@ class ParticleFilter:
 
         self.laser_max_distance = 2.0   # maximum penalty to assess in the likelihood field model
 
-        self.particle_distance_variance = .5        # Meter
-        self.particle_angle_variance = 3.141  # Radians
+        self.particle_distance_variance = .2        # Meter
+        self.particle_angle_variance = 3.141 / 3  # Radians
 
         self.sigma = .5
         self.reselection_amount = 0.05      
@@ -153,20 +153,24 @@ class ParticleFilter:
         # First make sure that the particle weights are normalized
         self.normalize_particles()
 
-        # ones = []
+        ones = []
         # Calculate the average pos of all of the likeliest particles
         # for aParticle in self.particle_cloud:     
         #   if aParticle.w == 1.0:      
         #     ones.append(aParticle)      
                     
         # # Average their coordinates
-        # print "sum: ", sum_particles(ones)
-        # print "most likely: ", self.most_likely_particle.as_pose()
-        # self.robot_pose = sum_particles(ones)       
+                # print "sum: ", self.sum_particles(ones)
+                # print "most likely: ", self.most_likely_particle.as_pose()
+        # self.robot_pose = self.sum_particles(ones)       
 
-        # Deprecated; assign new robot pose using one of the weight 1.0 particles     
+        # Deprecated -- assign new robot pose using one of the weight 1.0 particles     
         if self.most_likely_particle is not None:     
-            self.robot_pose = self.most_likely_particle.as_pose()     
+            self.robot_pose = self.most_likely_particle.as_pose()
+            print "updating robot pose to", self.most_likely_particle.as_pose()
+        else:
+            print "ERR: NO LIKELY PARTICLE. NOT UPDATING POSE"
+
                 
         # Deprecated -- Don't update pose
         # self.robot_pose = Pose()
@@ -201,7 +205,7 @@ class ParticleFilter:
 
             msg: this is not really needed to implement this, but is here just in case.
         """
-        print "Odom particle updating"
+        # print "Odom particle updating"
 
         new_odom_xy_theta = convert_pose_to_xy_and_theta(self.odom_pose.pose)
         # compute the change in x,y,theta since our last update
@@ -248,15 +252,19 @@ class ParticleFilter:
         # make sure the distribution is normalized
         self.normalize_particles()
         
-
+        print "weights: ", self.particle_weights
         survivors = self.draw_random_sample(self.particle_cloud, self.particle_weights,         
                                     self.reselection_amount * self.n_particles)     
-        print "Num survivors / all: ", len(survivors), " / ", len(self.particle_cloud)      
+        # print "Num survivors / all: ", len(survivors), " / ", len(self.particle_cloud)      
                 
                 
         # create new children of the survivors with variance, eliminate non-survivors       
-        self.particle_cloud = []      
+        self.particle_cloud = []  
+        print "Printing survivors:"   
+        s = 0
         for aSurvivor in survivors:
+            #print "survivor " + str(s) +": ", aSurvivor.as_pose()
+            s += 1
             self.particle_cloud.append(aSurvivor)     
             for i in range(1, int(1/self.reselection_amount)):      
                 x_hyp = aSurvivor.x + (random.random() - 0.5) * self.particle_distance_variance       
@@ -269,12 +277,12 @@ class ParticleFilter:
     def update_particles_with_laser(self, msg):
         """ Updates the particle weights in response to the scan contained in the msg """
         # Determine weights using particle-lidar-map likelihood             # TODO: implement this
-        print "updating with laser"     
+        # print "updating with laser"     
         for aParticle in self.particle_cloud:       
             # Iterate over lidar data (distances) by angle (degrees)        
-            likelihoods = [0] * 1         # Stores likelihood of each lidar slice       
+            likelihoods = [0] * 360         # Stores likelihood of each lidar slice       
                 
-            for angle_degrees in range(0, 1):       
+            for angle_degrees in range(0, 360):       
                     
                 # Add lidar distance to particle at angle       
                 distance = msg.ranges[angle_degrees]        # Raw lidar at lidar angle      
@@ -294,18 +302,15 @@ class ParticleFilter:
                 # average the cube of each likelihood       
             aParticle.w = math.fsum([l ** 3 for l in likelihoods]) / len(likelihoods)       
                 
-        self.particle_weights = []      
-        for aParticle in self.particle_cloud:       
-            self.particle_weights.append(aParticle.w)       
-        
-        self.normalize_particles()      
+        self.normalize_particles()   
                 
-        normalized_counter = 0      
-        for index, aParticle in enumerate(self.particle_cloud):     
-            if aParticle.w == 1.0:      
-              normalized_counter += 1       
+        # debug: count to make sure only one particle got a weight of 1
+        # normalized_counter = 0      
+        # for index, aParticle in enumerate(self.particle_cloud):     
+        #     if aParticle.w == 1.0:      
+        #       normalized_counter += 1       
                     
-        print "P of weight 1.0:", normalized_counter
+        # print "P of weight 1.0:", normalized_counter
 
     @staticmethod
     def weighted_values(values, probabilities, size):
@@ -373,16 +378,54 @@ class ParticleFilter:
 
     def normalize_particles(self):
         """ Make sure the particle weights define a valid distribution (i.e. sum to 1.0) """
-        # Find largest weight
-        largest = 0.0
-        for aParticle in self.particle_cloud:
-            if aParticle.w > largest:
-                largest = aParticle.w
-                self.most_likely_particle = aParticle
+        print "Begin normalizing"
 
-        # Normalize
+        total = 0
         for aParticle in self.particle_cloud:
-            aParticle.w = aParticle.w / largest
+            total += aParticle.w
+
+        for aParticle in self.particle_cloud:
+            aParticle.w = aParticle.w / total
+
+        # # Find largest and smallest weights
+        # largest = 0.0
+        # smallest = 100
+        # for aParticle in self.particle_cloud:
+        #     print "particle w: ", aParticle.w
+        #     if aParticle.w > largest:
+        #         largest = aParticle.w
+        #     elif aParticle.w < smallest:
+        #         smallest = aParticle.w
+
+        # # Check
+        # if largest == smallest:
+        #     for aParticle in self.particle_cloud:
+        #         aParticle.w = 1.0 / len(self.particle_cloud)
+        #     self.most_likely_particle = self.particle_cloud[0]
+        #     return 
+
+        # print "largest:", largest
+        # print "smallest:", smallest
+
+        # # Normalize:
+        # self.particle_weights = []
+        # for aParticle in self.particle_cloud:
+        #     w = (aParticle.w - smallest) / (largest - smallest)
+        #     aParticle.w = w
+        #     self.particle_weights.append(w)
+
+        self.particle_weights = []
+        for aParticle in self.particle_cloud:
+            self.particle_weights.append(aParticle.w)
+
+        print "sum:", sum(self.particle_weights)
+
+        # Find your mom (largest weight) again, just because
+        heaviest = 0
+        for aParticle in self.particle_cloud:
+            if aParticle.w > heaviest:
+                heaviest = aParticle.w
+                self.most_likely_particle = aParticle
         
     def publish_particles(self, msg):
         particles_conv = []

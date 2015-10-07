@@ -1,0 +1,473 @@
+updating robot pose to position: 
+  x: 1.309867247
+  y: -0.502950665514
+  z: 0
+orientation: 
+  x: 0.0
+  y: 0.0
+  z: -0.375931120799
+  w: 0.92664760962
+updating robot pose to position: 
+  x: 1.78101246535
+  y: -0.708576836185
+  z: 0
+orientation: 
+  x: 0.0
+  y: 0.0
+  z: -0.478647178104
+  w: 0.878007334191
+Printing survivors:
+survivor 0:  position: 
+  x: 1.45189759141
+  y: -0.702240136153
+  z: 0
+orientation: 
+  x: 0.0
+  y: 0.0
+  z: -0.38666041315
+  w: 0.922222166781
+survivor 0:  position: 
+  x: 1.51593450932
+  y: -0.658705429372
+  z: 0
+orientation: 
+  x: 0.0
+  y: 0.0
+  z: -0.342145415557
+  w: 0.939647015966
+survivor 0:  position: 
+  x: 1.60476142764
+  y: -0.638687639124
+  z: 0
+orientation: 
+  x: 0.0
+  y: 0.0
+  z: -0.0893930232604
+  w: 0.995996429407
+survivor 0:  position: 
+  x: 1.68853193943
+  y: -0.465958284305
+  z: 0
+orientation: 
+  x: 0.0
+  y: 0.0
+  z: -0.161451552963
+  w: 0.986880639209
+survivor 0:  position: 
+  x: 1.45189759141
+  y: -0.702240136153
+  z: 0
+orientation: 
+  x: 0.0
+  y: 0.0
+  z: -0.38666041315
+  w: 0.922222166781
+survivor 0:  position: 
+  x: 1.60476142764
+  y: -0.638687639124
+  z: 0
+orientation: 
+  x: 0.0
+  y: 0.0
+  z: -0.0893930232604
+  w: 0.995996429407
+survivor 0:  position: 
+  x: 1.45189759141
+  y: -0.702240136153
+  z: 0
+orientation: 
+  x: 0.0
+  y: 0.0
+  z: -0.38666041315
+  w: 0.922222166781
+survivor 0:  position: 
+  x: 1.68853193943
+  y: -0.465958284305
+  z: 0
+orientation: 
+  x: 0.0
+  y: 0.0
+  z: -0.161451552963
+  w: 0.986880639209
+survivor 0:  position: 
+  x: 1.68853193943
+  y: -0.465958284305
+  z: 0
+orientation: 
+  x: 0.0
+  y: 0.0
+  z: -0.161451552963
+  w: 0.986880639209
+survivor 0:  position: 
+  x: 1.68853193943
+  y: -0.465958284305
+  z: 0
+orientation: 
+  x: 0.0
+  y: 0.0
+  z: -0.161451552963
+  w: 0.986880639209
+survivor 0:  position: 
+  x: 1.60476142764
+  y: -0.638687639124
+  z: 0
+orientation: 
+  x: 0.0
+  y: 0.0
+  z: -0.0893930232604
+  w: 0.995996429407
+survivor 0:  position: 
+  x: 1.68853193943
+  y: -0.465958284305
+  z: 0
+orientation: 
+  x: 0.0
+  y: 0.0
+  z: -0.161451552963
+  w: 0.986880639209
+survivor 0:  position: 
+  x: 1.60476142764
+  y: -0.638687639124
+  z: 0
+orientation: 
+  x: 0.0
+  y: 0.0
+  z: -0.0893930232604
+  w: 0.995996429407
+survivor 0:  position: 
+  x: 1.64295082924
+  y: -0.632969548897
+  z: 0
+orientation: 
+  x: 0.0
+  y: 0.0
+  z: -0.275551117627
+  w: 0.961286420155
+survivor 0:  position: 
+  x: 1.64295082924
+  y: -0.632969548897
+  z: 0
+orientation: 
+  x: 0.0
+  y: 0.0
+  z: -0.275551117627
+  w: 0.961286420155
+updating robot pose to position: 
+  x: 1.78930071777
+  y: -0.738060514227
+  z: 0
+orientation: 
+  x: 0.0
+  y: 0.0
+  z: 0.355102305363
+  w: 0.934827445428
+Printing survivors:
+survivor 0:  position: 
+  x: 1.45234575662
+  y: -0.592865199602
+  z: 0
+orientation: 
+  x: 0.0
+  y: 0.0
+  z: 0.113656602058
+  w: 0.993520093812
+survivor 0:  position: 
+  x: 1.48672395581
+  y: -0.612602607175
+  z: 0
+orientation: 
+  x: 0.0
+  y: 0.0
+  z: 0.126329146593
+  w: 0.991988380336
+survivor 0:  position: 
+  x: 1.47745132939
+  y: -0.878601678572
+  z: 0
+orientation: 
+  x: 0.0
+  y: 0.0
+  z: 0.0708825092743
+  w: 0.997484671501
+survivor 0:  position: 
+  x: 1.48672395581
+  y: -0.612602607175
+  z: 0
+orientation: 
+  x: 0.0
+  y: 0.0
+  z: 0.126329146593
+  w: 0.991988380336
+survivor 0:  position: 
+  x: 1.51626886845
+  y: -0.813772304062
+  z: 0
+orientation: 
+  x: 0.0
+  y: 0.0
+  z: -0.0307993391312
+  w: 0.999525587821
+survivor 0:  position: 
+  x: 1.48672395581
+  y: -0.612602607175
+  z: 0
+orientation: 
+  x: 0.0
+  y: 0.0
+  z: 0.126329146593
+  w: 0.991988380336
+survivor 0:  position: 
+  x: 1.47745132939
+  y: -0.878601678572
+  z: 0
+orientation: 
+  x: 0.0
+  y: 0.0
+  z: 0.0708825092743
+  w: 0.997484671501
+survivor 0:  position: 
+  x: 1.51626886845
+  y: -0.813772304062
+  z: 0
+orientation: 
+  x: 0.0
+  y: 0.0
+  z: -0.0307993391312
+  w: 0.999525587821
+survivor 0:  position: 
+  x: 1.43152759608
+  y: -0.674231491684
+  z: 0
+orientation: 
+  x: 0.0
+  y: 0.0
+  z: 0.283045303934
+  w: 0.959106540443
+survivor 0:  position: 
+  x: 1.51626886845
+  y: -0.813772304062
+  z: 0
+orientation: 
+  x: 0.0
+  y: 0.0
+  z: -0.0307993391312
+  w: 0.999525587821
+survivor 0:  position: 
+  x: 1.47745132939
+  y: -0.878601678572
+  z: 0
+orientation: 
+  x: 0.0
+  y: 0.0
+  z: 0.0708825092743
+  w: 0.997484671501
+survivor 0:  position: 
+  x: 1.51626886845
+  y: -0.813772304062
+  z: 0
+orientation: 
+  x: 0.0
+  y: 0.0
+  z: -0.0307993391312
+  w: 0.999525587821
+survivor 0:  position: 
+  x: 1.45234575662
+  y: -0.592865199602
+  z: 0
+orientation: 
+  x: 0.0
+  y: 0.0
+  z: 0.113656602058
+  w: 0.993520093812
+survivor 0:  position: 
+  x: 1.43152759608
+  y: -0.674231491684
+  z: 0
+orientation: 
+  x: 0.0
+  y: 0.0
+  z: 0.283045303934
+  w: 0.959106540443
+survivor 0:  position: 
+  x: 1.47745132939
+  y: -0.878601678572
+  z: 0
+orientation: 
+  x: 0.0
+  y: 0.0
+  z: 0.0708825092743
+  w: 0.997484671501
+updating robot pose to position: 
+  x: 1.68938172669
+  y: -0.70645379113
+  z: 0
+orientation: 
+  x: 0.0
+  y: 0.0
+  z: 0.831049013548
+  w: 0.556199188314
+Printing survivors:
+survivor 0:  position: 
+  x: 1.51991902934
+  y: -0.57651209843
+  z: 0
+orientation: 
+  x: 0.0
+  y: 0.0
+  z: 0.501135416978
+  w: 0.86536887733
+survivor 0:  position: 
+  x: 1.28931622775
+  y: -0.5801141617
+  z: 0
+orientation: 
+  x: 0.0
+  y: 0.0
+  z: 0.614903693299
+  w: 0.78860221149
+survivor 0:  position: 
+  x: 1.51991902934
+  y: -0.57651209843
+  z: 0
+orientation: 
+  x: 0.0
+  y: 0.0
+  z: 0.501135416978
+  w: 0.86536887733
+survivor 0:  position: 
+  x: 1.42725851782
+  y: -0.665209965609
+  z: 0
+orientation: 
+  x: 0.0
+  y: 0.0
+  z: 0.620831434365
+  w: 0.783944086083
+survivor 0:  position: 
+  x: 1.52042751266
+  y: -0.492734128466
+  z: 0
+orientation: 
+  x: 0.0
+  y: 0.0
+  z: 0.546278619211
+  w: 0.837603528045
+survivor 0:  position: 
+  x: 1.44343810037
+  y: -0.49309233714
+  z: 0
+orientation: 
+  x: 0.0
+  y: 0.0
+  z: 0.442305829724
+  w: 0.896864289061
+survivor 0:  position: 
+  x: 1.28931622775
+  y: -0.5801141617
+  z: 0
+orientation: 
+  x: 0.0
+  y: 0.0
+  z: 0.614903693299
+  w: 0.78860221149
+survivor 0:  position: 
+  x: 1.51991902934
+  y: -0.57651209843
+  z: 0
+orientation: 
+  x: 0.0
+  y: 0.0
+  z: 0.501135416978
+  w: 0.86536887733
+survivor 0:  position: 
+  x: 1.28931622775
+  y: -0.5801141617
+  z: 0
+orientation: 
+  x: 0.0
+  y: 0.0
+  z: 0.614903693299
+  w: 0.78860221149
+survivor 0:  position: 
+  x: 1.52042751266
+  y: -0.492734128466
+  z: 0
+orientation: 
+  x: 0.0
+  y: 0.0
+  z: 0.546278619211
+  w: 0.837603528045
+survivor 0:  position: 
+  x: 1.44343810037
+  y: -0.49309233714
+  z: 0
+orientation: 
+  x: 0.0
+  y: 0.0
+  z: 0.442305829724
+  w: 0.896864289061
+survivor 0:  position: 
+  x: 1.44343810037
+  y: -0.49309233714
+  z: 0
+orientation: 
+  x: 0.0
+  y: 0.0
+  z: 0.442305829724
+  w: 0.896864289061
+survivor 0:  position: 
+  x: 1.44343810037
+  y: -0.49309233714
+  z: 0
+orientation: 
+  x: 0.0
+  y: 0.0
+  z: 0.442305829724
+  w: 0.896864289061
+survivor 0:  position: 
+  x: 1.42725851782
+  y: -0.665209965609
+  z: 0
+orientation: 
+  x: 0.0
+  y: 0.0
+  z: 0.620831434365
+  w: 0.783944086083
+survivor 0:  position: 
+  x: 1.44343810037
+  y: -0.49309233714
+  z: 0
+orientation: 
+  x: 0.0
+  y: 0.0
+  z: 0.442305829724
+  w: 0.896864289061
+... logging to /home/thomas/.ros/log/9ec485e2-6c7c-11e5-9374-080027d41cd9/roslaunch-thomas-VirtualBox-32508.log
+Checking log directory for disk usage. This may take awhile.
+Press Ctrl-C to interrupt
+Done checking log file disk usage. Usage is <1GB.
+]2;/home/thomas/catkin_ws/src/comprobo15/my_pf/launch/test_my_pf.launch
+[1mstarted roslaunch server http://thomas-VirtualBox:42913/[0m
+
+SUMMARY
+========
+
+PARAMETERS
+ * /rosdistro: indigo
+ * /rosversion: 1.11.13
+
+NODES
+  /
+    map_server (map_server/map_server)
+    pf (my_pf/pf.py)
+
+[1mROS_MASTER_URI=http://localhost:11311[0m
+]2;/home/thomas/catkin_ws/src/comprobo15/my_pf/launch/test_my_pf.launch http://localhost:11311
+core service [/rosout] found
+[1mprocess[map_server-1]: started with pid [32526][0m
+[1mprocess[pf-2]: started with pid [32547][0m
+[pf-2] killing on exit
+[map_server-1] killing on exit
+shutting down processing monitor...
+... shutting down processing monitor complete
+[1mdone[0m
