@@ -103,10 +103,10 @@ class ParticleFilter:
 
         self.laser_max_distance = 2.0   # maximum penalty to assess in the likelihood field model
 
-        self.particle_distance_variance = .1
-        self.particle_angle_variance = 3.141 / 2  # Radians
+        self.particle_distance_variance = .5        # Meter
+        self.particle_angle_variance = 3.141  # Radians
 
-        self.sigma = .1        
+        self.sigma = .5
         self.reselection_amount = 0.05      
         self.most_likely_particle = None
         # TODO: define additional constants if needed
@@ -150,12 +150,26 @@ class ParticleFilter:
                 (1): compute the mean pose
                 (2): compute the most likely pose (i.e. the mode of the distribution)
         """
-        # first make sure that the particle weights are normalized
+        # First make sure that the particle weights are normalized
         self.normalize_particles()
 
-        # TODO: assign the lastest pose into self.robot_pose as a geometry_msgs.Pose object
-        # just to get started we will fix the robot's pose to always be at the origin
-        self.robot_pose = Pose()
+        # ones = []
+        # Calculate the average pos of all of the likeliest particles
+        # for aParticle in self.particle_cloud:     
+        #   if aParticle.w == 1.0:      
+        #     ones.append(aParticle)      
+                    
+        # # Average their coordinates
+        # print "sum: ", sum_particles(ones)
+        # print "most likely: ", self.most_likely_particle.as_pose()
+        # self.robot_pose = sum_particles(ones)       
+
+        # Deprecated; assign new robot pose using one of the weight 1.0 particles     
+        if self.most_likely_particle is not None:     
+            self.robot_pose = self.most_likely_particle.as_pose()     
+                
+        # Deprecated -- Don't update pose
+        # self.robot_pose = Pose()
 
     def sum_particles(self, particle_list):     
         # Determines the average coordinate from a list of particles.       
@@ -237,19 +251,19 @@ class ParticleFilter:
 
         survivors = self.draw_random_sample(self.particle_cloud, self.particle_weights,         
                                     self.reselection_amount * self.n_particles)     
-        print "num survivors / all: ", len(survivors), " / ", len(self.particle_cloud)      
+        print "Num survivors / all: ", len(survivors), " / ", len(self.particle_cloud)      
                 
                 
         # create new children of the survivors with variance, eliminate non-survivors       
-        # self.particle_cloud = []      
-        # for aSurvivor in survivors:       
-        #     self.particle_cloud.append(aSurvivor)     
-        #     for i in range(1, int(1/self.reselection_amount)):        
-        #         x_hyp = aSurvivor.x + (random.random() - 0.5) * self.particle_distance_variance       
-        #         y_hyp = aSurvivor.y + (random.random() - 0.5) * self.particle_distance_variance       
-        #         theta_hyp = aSurvivor.theta + (random.random() - 0.5) * self.particle_angle_variance      
+        self.particle_cloud = []      
+        for aSurvivor in survivors:
+            self.particle_cloud.append(aSurvivor)     
+            for i in range(1, int(1/self.reselection_amount)):      
+                x_hyp = aSurvivor.x + (random.random() - 0.5) * self.particle_distance_variance       
+                y_hyp = aSurvivor.y + (random.random() - 0.5) * self.particle_distance_variance       
+                theta_hyp = aSurvivor.theta + (random.random() - 0.5) * self.particle_angle_variance      
         
-        #     self.particle_cloud.append(Particle(x_hyp, y_hyp, theta_hyp))
+                self.particle_cloud.append(Particle(x_hyp, y_hyp, theta_hyp))
 
 
     def update_particles_with_laser(self, msg):
