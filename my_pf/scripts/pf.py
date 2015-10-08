@@ -103,13 +103,12 @@ class ParticleFilter:
 
         self.laser_max_distance = 2.0   # maximum penalty to assess in the likelihood field model
 
-        self.particle_distance_variance = .2        # Meter
+        self.particle_distance_variance = .3        # Meter
         self.particle_angle_variance = 3.141 / 3  # Radians
 
         self.sigma = .5
         self.reselection_amount = 0.05      
         self.most_likely_particle = None
-        # TODO: define additional constants if needed
 
         # Setup pubs and subs
 
@@ -117,6 +116,7 @@ class ParticleFilter:
         self.pose_listener = rospy.Subscriber("initialpose", PoseWithCovarianceStamped, self.update_initial_pose)
         # publish the current particle cloud.  This enables viewing particles in rviz.
         self.particle_pub = rospy.Publisher("particlecloud", PoseArray, queue_size=10)
+        self.survivor_pub = rospy.Publisher("survivorcloud", PoseArray, queue_size=10)
 
         # laser_subscriber listens for data from the lidar
         self.laser_subscriber = rospy.Subscriber(self.scan_topic, LaserScan, self.scan_received)
@@ -126,12 +126,11 @@ class ParticleFilter:
         self.tf_broadcaster = TransformBroadcaster()
 
         self.particle_cloud = []
+        self.survivor_cloud = []
 
         self.current_odom_xy_theta = []
 
         # request the map from the map server, the map should be of type nav_msgs/OccupancyGrid
-        # TODO: fill in the appropriate service call here.  The resultant map should be assigned be passed
-        #       into the init method for OccupancyField
         rospy.wait_for_service('static_map')
         try:
           static_map_svc = rospy.ServiceProxy("static_map", GetMap)
@@ -153,7 +152,7 @@ class ParticleFilter:
         # First make sure that the particle weights are normalized
         self.normalize_particles()
 
-        ones = []
+        # ones = []
         # Calculate the average pos of all of the likeliest particles
         # for aParticle in self.particle_cloud:     
         #   if aParticle.w == 1.0:      
@@ -164,7 +163,7 @@ class ParticleFilter:
                 # print "most likely: ", self.most_likely_particle.as_pose()
         # self.robot_pose = self.sum_particles(ones)       
 
-        # Deprecated -- assign new robot pose using one of the weight 1.0 particles     
+        # Deprecated -- assign new robot pose using most likely particle    
         if self.most_likely_particle is not None:     
             self.robot_pose = self.most_likely_particle.as_pose()
             print "updating robot pose to", self.most_likely_particle.as_pose()
@@ -174,28 +173,6 @@ class ParticleFilter:
                 
         # Deprecated -- Don't update pose
         # self.robot_pose = Pose()
-
-    def sum_particles(self, particle_list):     
-        # Determines the average coordinate from a list of particles.       
-        x_sum = 0.0     
-        y_sum = 0.0     
-        theta_sum = 0.0     
-        num = len(particle_list)        
-                
-        # Sum all x, y, theta data (averaged later)     
-        for aParticle in particle_list:     
-          x_sum += aParticle.x      
-          y_sum += aParticle.y      
-          theta_sum += aParticle.theta      
-                
-        # Create particle with pose information to extract Pose class       
-        new_pose_particle = Particle(x = x_sum / num,       
-                                     y = y_sum / num,       
-                                     theta = theta_sum / num,       
-                                     w = 0)     
-        new_pose = new_pose_particle.as_pose()      
-                
-        return new_pose
 
     def update_particles_with_odom(self, msg):
         """ Update the particles using the newly given odometry pose.
@@ -251,20 +228,16 @@ class ParticleFilter:
         """
         # make sure the distribution is normalized
         self.normalize_particles()
-        
-        print "weights: ", self.particle_weights
-        survivors = self.draw_random_sample(self.particle_cloud, self.particle_weights,         
-                                    self.reselection_amount * self.n_particles)     
-        # print "Num survivors / all: ", len(survivors), " / ", len(self.particle_cloud)      
-                
-                
+        # print [x.w for x in self.particle_cloud]
+
+        # #Get the top n particles 
+        self.survivor_cloud = self.get_top_particles(int(self.n_particles * self.reselection_amount))
+ 
         # create new children of the survivors with variance, eliminate non-survivors       
         self.particle_cloud = []  
-        print "Printing survivors:"   
-        s = 0
-        for aSurvivor in survivors:
+        # print "Printing survivors:"   
+        for aSurvivor in self.survivor_cloud:
             #print "survivor " + str(s) +": ", aSurvivor.as_pose()
-            s += 1
             self.particle_cloud.append(aSurvivor)     
             for i in range(1, int(1/self.reselection_amount)):      
                 x_hyp = aSurvivor.x + (random.random() - 0.5) * self.particle_distance_variance       
@@ -272,27 +245,64 @@ class ParticleFilter:
                 theta_hyp = aSurvivor.theta + (random.random() - 0.5) * self.particle_angle_variance      
         
                 self.particle_cloud.append(Particle(x_hyp, y_hyp, theta_hyp))
+        self.normalize_particles()
+        # # OLD: New approach: just close the most likely
+        # self.particle_cloud = []
+        # self.particle_cloud.append(self.most_likely_particle)
+        # for i in range(1, self.n_particles):
+        #     x_hyp = self.most_likely_particle.x + (random.random() - 0.5) * self.particle_distance_variance       
+        #     y_hyp = self.most_likely_particle.y + (random.random() - 0.5) * self.particle_distance_variance       
+        #     theta_hyp = self.most_likely_particle.theta + (random.random() - 0.5) * self.particle_angle_variance      
+    
+        #     self.particle_cloud.append(Particle(x_hyp, y_hyp, theta_hyp))
+        
+        
+        # # OLD: we tried using draw random sample with little success 
+        # # print "weights: ", self.particle_weights
+        # survivors = self.draw_random_sample(self.particle_cloud, self.particle_weights,         
+        #                             self.reselection_amount * self.n_particles)    
+        # self.survivor_cloud = survivors
+        # # print "Num survivors / all: ", len(survivors), " / ", len(self.particle_cloud)      
+        
+                
+        # # create new children of the survivors with variance, eliminate non-survivors       
+        # self.particle_cloud = []  
+        # # print "Printing survivors:"   
+        # s = 0
+        # for aSurvivor in survivors:
+        #     #print "survivor " + str(s) +": ", aSurvivor.as_pose()
+        #     s += 1
+        #     self.particle_cloud.append(aSurvivor)     
+        #     for i in range(1, int(1/self.reselection_amount)):      
+        #         x_hyp = aSurvivor.x + (random.random() - 0.5) * self.particle_distance_variance       
+        #         y_hyp = aSurvivor.y + (random.random() - 0.5) * self.particle_distance_variance       
+        #         theta_hyp = aSurvivor.theta + (random.random() - 0.5) * self.particle_angle_variance      
+        
+        #         self.particle_cloud.append(Particle(x_hyp, y_hyp, theta_hyp))
 
+    def get_top_particles(self, amount):
+        # print [x.w for x in self.particle_cloud]
+        return sorted(self.particle_cloud, key = lambda x: x.w, reverse=True)[0:amount]
 
     def update_particles_with_laser(self, msg):
         """ Updates the particle weights in response to the scan contained in the msg """
-        # Determine weights using particle-lidar-map likelihood             # TODO: implement this
+        # Determine weights using particle-lidar-map likelihood
         # print "updating with laser"     
         for aParticle in self.particle_cloud:       
-            # Iterate over lidar data (distances) by angle (degrees)        
+            # Iterate over lidar data (distances) by angle (degrees)
             likelihoods = [0] * 360         # Stores likelihood of each lidar slice       
-                
+            
             for angle_degrees in range(0, 360):       
                     
-                # Add lidar distance to particle at angle       
+                # Get distance measure from robot at the given angle
                 distance = msg.ranges[angle_degrees]        # Raw lidar at lidar angle      
             
-                angle_rad = angle_degrees * math.pi / 180   # Convert to rads       
+                angle_rad = float(angle_degrees) * math.pi / 180   # Convert to rads       
                 angle_sum = aParticle.theta + angle_rad     
-                        
-                #       
-                hyp_x = aParticle.x + math.cos(angle_sum)       
-                hyp_y = aParticle.y + math.sin(angle_sum)       
+                
+                #
+                hyp_x = aParticle.x + (math.cos(angle_sum) * distance)      
+                hyp_y = aParticle.y + (math.sin(angle_sum) * distance)      
             
                 d = self.occupancy_field.get_closest_obstacle_distance(hyp_x, hyp_y)        
                         
@@ -374,11 +384,11 @@ class ParticleFilter:
         self.get_particles_with_noise(xy_theta)
 
         self.normalize_particles()
-        self.update_robot_pose()
+        self.robot_pose = self.odom_pose.pose
 
     def normalize_particles(self):
         """ Make sure the particle weights define a valid distribution (i.e. sum to 1.0) """
-        print "Begin normalizing"
+        # print "Begin normalizing"
 
         total = 0
         for aParticle in self.particle_cloud:
@@ -387,38 +397,11 @@ class ParticleFilter:
         for aParticle in self.particle_cloud:
             aParticle.w = aParticle.w / total
 
-        # # Find largest and smallest weights
-        # largest = 0.0
-        # smallest = 100
-        # for aParticle in self.particle_cloud:
-        #     print "particle w: ", aParticle.w
-        #     if aParticle.w > largest:
-        #         largest = aParticle.w
-        #     elif aParticle.w < smallest:
-        #         smallest = aParticle.w
-
-        # # Check
-        # if largest == smallest:
-        #     for aParticle in self.particle_cloud:
-        #         aParticle.w = 1.0 / len(self.particle_cloud)
-        #     self.most_likely_particle = self.particle_cloud[0]
-        #     return 
-
-        # print "largest:", largest
-        # print "smallest:", smallest
-
-        # # Normalize:
-        # self.particle_weights = []
-        # for aParticle in self.particle_cloud:
-        #     w = (aParticle.w - smallest) / (largest - smallest)
-        #     aParticle.w = w
-        #     self.particle_weights.append(w)
-
         self.particle_weights = []
         for aParticle in self.particle_cloud:
             self.particle_weights.append(aParticle.w)
 
-        print "sum:", sum(self.particle_weights)
+        # print "sum:", sum(self.particle_weights)
 
         # Find your mom (largest weight) again, just because
         heaviest = 0
@@ -435,6 +418,14 @@ class ParticleFilter:
         self.particle_pub.publish(PoseArray(header=Header(stamp=rospy.Time.now(),
                                             frame_id=self.map_frame),
                                   poses=particles_conv))
+        # Debug               
+        survivor_conv = []
+        for p in self.survivor_cloud:   
+            survivor_conv.append(p.as_pose())
+        # actually send the message so that we can view it in rviz
+        self.survivor_pub.publish(PoseArray(header=Header(stamp=rospy.Time.now(),
+                                            frame_id=self.map_frame),
+                                  poses=survivor_conv))
 
     def scan_received(self, msg):
         """ This is the default logic for what to do when processing scan data.
